@@ -8,12 +8,19 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import './App.css';
+// import Clarifai from 'clarifai';
+// const clarifaiApp = new Clarifai.App({apiKey: '4390cb4e28d948048cff29fce4144434'});
 
 const returnClarifyRequestOptions = (imageUrl)=>{
+    // Your PAT (Personal Access Token) can be found in the Account's Security section
     const PAT = '4390cb4e28d948048cff29fce4144434';
+    // Specify the correct user_id/app_id pairings
+    // Since you're making inferences outside your app's scope
     const USER_ID = 'mbigilinelsonclarify';       
-    const APP_ID = 'GetFace';  
+    const APP_ID = 'GetFace';
+    // Change these to whatever model and image URL you want to use   
     const IMAGE_URL = imageUrl;
+
     const raw = JSON.stringify({
         "user_app_id": {
             "user_id": USER_ID,
@@ -106,7 +113,7 @@ class App extends Component {
       .then(response => {
         console.log('hi', response)
         if (response) {
-          fetch('http://localhost:3000/image', {
+          fetch('https://getface-backend.onrender.com/image', {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -117,7 +124,7 @@ class App extends Component {
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count}))
             })
-            .catch(console.log)
+            .catch("Could not fetch!")
         }
         this.displayFaceBox(this.calculateFaceLocation(response))
       })

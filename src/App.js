@@ -104,10 +104,10 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({imageUrl: this.state.input});
-    //const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
     const apiUrl = 'https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs';
     //clarifaiApp.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-    fetch(/*corsProxyUrl + */ apiUrl, returnClarifyRequestOptions(this.state.input))
+    fetch(corsProxyUrl +  apiUrl, returnClarifyRequestOptions(this.state.input))
       .then(response => response.json())
       .then(response => {
         console.log('hi', response)

@@ -8,46 +8,7 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
 import './App.css';
-// import Clarifai from 'clarifai';
-// const clarifaiApp = new Clarifai.App({apiKey: '4390cb4e28d948048cff29fce4144434'});
 
-const returnClarifyRequestOptions = (imageUrl)=>{
-    // Your PAT (Personal Access Token) can be found in the Account's Security section
-    const PAT = '4390cb4e28d948048cff29fce4144434';
-    // Specify the correct user_id/app_id pairings
-    // Since you're making inferences outside your app's scope
-    const USER_ID = 'mbigilinelsonclarify';       
-    const APP_ID = 'GetFace';
-    // Change these to whatever model and image URL you want to use   
-    const IMAGE_URL = imageUrl;
-
-    const raw = JSON.stringify({
-        "user_app_id": {
-            "user_id": USER_ID,
-            "app_id": APP_ID
-        },
-        "inputs": [
-            {
-                "data": {
-                    "image": {
-                        "url": IMAGE_URL
-                    }
-                }
-            }
-        ]
-    });
-    const requestOptions = {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Key ' + PAT
-        },
-        body: raw
-    };
-
-    return requestOptions;
-}
-   
 const initialState=
 {
     input: '',
@@ -104,32 +65,34 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({imageUrl: this.state.input});
-    const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const apiUrl = 'https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs';
-    //clarifaiApp.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-    fetch(corsProxyUrl +  apiUrl, returnClarifyRequestOptions(this.state.input))
-      .then(response => response.json())
-      .then(response => {
-        console.log('hi', response)
-        if (response) {
-          fetch('https://getface-backend.onrender.com/image', {
-            method: 'put',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-              id: this.state.user.id
-            })
-          })
-            .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count}))
-            })
-            .catch("Could not fetch!")
-        }
-        this.displayFaceBox(this.calculateFaceLocation(response))
+    fetch('https://getface-backend.onrender.com/face-detect', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        imageUrl: this.state.input
       })
-      .catch(err => console.log(err));
-  }
-
+    })
+    .then(response => response.json())
+    .then(response => {
+      console.log('hi', response)
+      if (response) {
+        fetch('https://getface-backend.onrender.com/image', {
+          method: 'put',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: this.state.user.id
+          })
+        })
+        .then(response => response.json())
+        .then(count => {
+          this.setState(Object.assign(this.state.user, { entries: count}))
+        })
+        .catch(err => console.log("Could not fetch!"))
+      }
+      this.displayFaceBox(this.calculateFaceLocation(response))
+    })
+    .catch(err => console.log(err));
+}
   onRouteChange = (route) => {
     if (route === 'signout') {
       this.setState(initialState)
